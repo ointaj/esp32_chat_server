@@ -1,0 +1,9 @@
+-- The C compiler identification is Clang 15.0.7 with GNU-like command-line
+-- The CXX compiler identification is Clang 15.0.7 with GNU-like command-line
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - failed
+-- Check for working C compiler: C:/Program Files/LLVM/bin/clang.exe
+-- Check for working C compiler: C:/Program Files/LLVM/bin/clang.exe - broken
+-- Configuring incomplete, errors occurred!
+See also "C:/chat_server_esp32/wifi/build/CMakeFiles/CMakeOutput.log".
+See also "C:/chat_server_esp32/wifi/build/CMakeFiles/CMakeError.log".
