@@ -1,4 +1,5 @@
 build/
 .vscode/
 main/build/
-wifi/build
+components/wifi/build
+components/storage/build

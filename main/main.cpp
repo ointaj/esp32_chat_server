@@ -6,15 +6,20 @@
 
 #include "wifi.hpp"
 
-extern "C" {
+extern "C"
+{
+    /** @brief  Main funciton which run process one 
+     *  @param  non 
+     *  @return non **/
     void app_main(void);
 }
 
+/** @see app_main(void) **/
 void app_main(void)
 {
     while (1)
     {
         vTaskDelay(100);
-        ESP_LOGI("HI", "%d", value);
+        ESP_LOGI("APP", "Waiting....");
     }
 }
