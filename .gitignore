@@ -1,4 +1,4 @@
-/c/chat_server_esp32/build
-/c/chat_server_esp32/.vscode
-/c/chat_server_esp32/main/build
-/c/chat_server_esp32/components/wifi/build
+build/
+.vscode/
+main/build/
+wifi/build
