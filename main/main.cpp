@@ -1,15 +1,12 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+/** @brief ESP-IDF headers **/
 #include "esp_system.h"
-#include <tuple>
-#include "esp_log.h"
 
-#include "wifi.hpp"
+/** @brief App headers **/
+#include "system_run.hpp"
 
 extern "C"
 {
-    /** @brief  Main funciton which run process one 
-     *  @param  non 
+    /** @brief  Main funciton which run as "process one" 
      *  @return non **/
     void app_main(void);
 }
@@ -17,9 +14,5 @@ extern "C"
 /** @see app_main(void) **/
 void app_main(void)
 {
-    while (1)
-    {
-        vTaskDelay(100);
-        ESP_LOGI("APP", "Waiting....");
-    }
+    SystemRun::get_instance()->do_work();
 }

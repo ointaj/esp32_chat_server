@@ -3,3 +3,4 @@ build/
 main/build/
 components/wifi/build
 components/storage/build
+components/helpers/build

@@ -1,17 +1,22 @@
 #pragma once
 
 /**
- * @brief Main logic of application
- * @copyright Oliver Sintaj 2023
- * **/
+ * @file   system_run.cpp
+ * @author Oliver Sintaj
+ * @date   2023
+ * @brief  Main file
+ */
 
 
 /** @brief Class represents main logic of application **/
 class SystemRun final
 {
     private:
-        /** @brief instance of the class **/
+        /** @brief Instance of the class **/
         static SystemRun * _system_instance;
+
+        /** @brief Tag represents this module **/
+        static constexpr const char * TAG = "SystemRun";
 
     private:
         /** @brief SystemRun constructor **/
@@ -30,7 +35,6 @@ class SystemRun final
          * **/
         static SystemRun * get_instance()
         {
-
             if (nullptr == _system_instance)
             {
                _system_instance = new SystemRun();
@@ -40,6 +44,7 @@ class SystemRun final
         }
 
     public:
-        /** @brief Main function that runs app **/
+        /** @brief Main function that runs app 
+         *  @return non**/
         void do_work(void);
 };
