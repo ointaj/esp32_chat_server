@@ -1,11 +1,14 @@
 #pragma once
 
 /**
- * @file   system_run.cpp
+ * @file   system_run.hpp
  * @author Oliver Sintaj
  * @date   2023
  * @brief  Main file
  */
+
+/** @brief App headers **/
+#include "nvs_storage.hpp"
 
 
 /** @brief Class represents main logic of application **/
@@ -13,10 +16,13 @@ class SystemRun final
 {
     private:
         /** @brief Instance of the class **/
-        static SystemRun * _system_instance;
+        static SystemRun * m_system_instance;
 
         /** @brief Tag represents this module **/
-        static constexpr const char * TAG = "SystemRun";
+        static constexpr const char * m_TAG = "SystemRun";
+
+        /** @brief Instance of NVS Storage **/
+        NVS m_nvs;
 
     private:
         /** @brief SystemRun constructor **/
@@ -35,12 +41,12 @@ class SystemRun final
          * **/
         static SystemRun * get_instance()
         {
-            if (nullptr == _system_instance)
+            if (nullptr == m_system_instance)
             {
-               _system_instance = new SystemRun();
+               m_system_instance = new SystemRun();
             }
 
-            return _system_instance;
+            return m_system_instance;
         }
 
     public:

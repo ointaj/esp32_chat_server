@@ -1,4 +1,3 @@
-
 /** @brief ESP-idf headers **/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -9,7 +8,7 @@
 
 
 /** see header **/
-SystemRun * SystemRun::_system_instance = nullptr;
+SystemRun * SystemRun::m_system_instance = nullptr;
 
 /** see header **/
 void SystemRun::do_work()
@@ -17,7 +16,6 @@ void SystemRun::do_work()
     while (1)
     {
         vTaskDelay(100);
-        Output::log(e_LogType::Warn, TAG, "Hi ", 88, 12552);
+        Output::log(e_LogType::Warn, m_TAG, "Hi ", 88);
     }
 }
-
