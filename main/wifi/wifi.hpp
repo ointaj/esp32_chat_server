@@ -13,7 +13,7 @@
 #include "lwip/sys.h"
 
 /** @brief App headers **/
-#include "output.hpp"
+#include "helpers/output.hpp"
 
 /**
  * @file   wifi.hpp
@@ -47,6 +47,7 @@ class WifiModule final
                                        m_TAG, " esp_netif_init");
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_event_loop_create_default(),
                                        m_TAG, " esp_event_loop_create_default");
+            esp_netif_create_default_wifi_ap();
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_wifi_init(&cfg),
                                        m_TAG, " esp_netif_init");
         }

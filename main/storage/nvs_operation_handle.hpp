@@ -15,7 +15,7 @@
 
 /** @brief App headers **/
 #include "output.hpp"
-#include "data_defintion/nvs_data.hpp"
+#include "nvs_data.hpp"
 
 
 /** @brief Macro defintion of checking nvs last operation, before executing new one **/
@@ -24,12 +24,21 @@
         return (RESULT_VAR); \
     }
 
+/** @brief Macro defintion of checking open mode and operation mode are same **/
+#define M_CHECK_OPERATION_TYPE(nvs_mode, operation_type, TAG) \
+    do { \
+        if (static_cast<e_nvs_operation_type>(nvs_mode) != operation_type) { \
+            Output::log(e_log_type::et_ERROR, TAG, "Open mode does not match operation type ! "); \
+            return ESP_FAIL; \
+        } \
+    } while(0)
+
+/** @brief Enum represent operatation types**/
 enum class e_nvs_operation_type
 {
     et_READ,
-    et_READ_WRITE
-}
-
+    et_WRITE
+};
 
 /** @brief Class represent working with NVS storage **/
 class NVSOperationHandle final
@@ -96,15 +105,19 @@ class NVSOperationHandle final
 
     public:
         /**
-         * @brief Member funtion for writting/reading (storing/getting)'number' to NVS storage
+         * @brief Member funtion for writting (storing) 'number' to NVS storage
          * @param key   Key value for storing
          * @param value Value to be stored 
          * @return result of storing
          * **/
         template<typename T>
-        esp_err_t operation_with_nvs_storage_numb(const char * key,
-                                                  T value)
+        esp_err_t write_nvs_storage_numb(const char * key,
+                                         T value)
         {
+            esp_err_t res = ESP_FAIL;
+            // Check if operatrion can be perfomre, based on mode
+            M_CHECK_OPERATION_TYPE(m_nvs_config.m_nvs_mode, e_nvs_operation_type::et_WRITE, m_TAG);
+
             // We cannnot continue when previous operation (initialization in this case) has failed
             M_CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
             
@@ -113,35 +126,35 @@ class NVSOperationHandle final
 
             if constexpr (std::is_same_v<std::decay_t<T>, uint8_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_u8(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_u8(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, uint16_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_u16(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_u16(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, uint32_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_u32(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_u32(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_u64(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_u64(m_nvs_config.m_nvs_handle, l_key , value);
             }       
             else if constexpr (std::is_same_v<std::decay_t<T>, int8_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_i8(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_i8(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, int16_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_i16(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_i16(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, int32_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_i32(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_i32(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_i64(m_nvs_config.m_nvs_handle, l_key , value);
+               res = nvs_set_i64(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else
             {
@@ -153,12 +166,83 @@ class NVSOperationHandle final
                                              std::is_same<std::decay_t<T>, int16_t>,
                                              std::is_same<std::decay_t<T>, int32_t>,
                                              std::is_same<std::decay_t<T>, int64_t>>::value,
-                                             "Invalid type for operation_with_nvs_storage_numb");
+                                             "Invalid type for write_nvs_storage_numb");
             }
 
-            Output::esp_result_handler(e_abort_handle::et_NOT_THROW, m_nvs_config.m_nvs_operation_res, m_TAG, "operation_with_nvs_storage_numb");
+            Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "write_nvs_storage_numb");
 
-            return m_nvs_config.m_nvs_operation_res;
+            return res;
+        }
+        
+        /**
+         * @brief Member funtion for reading (getting) 'number' from NVS storage
+         * @param key   Key value for storing
+         * @param value Value to be stored 
+         * @return result of storing
+         * **/
+        template<typename T>
+        esp_err_t read_nvs_storage_numb(const char * key,
+                                         T * value)
+        {
+            esp_err_t res = ESP_FAIL;
+
+            // Check if operatrion can be perfomre, based on mode
+            M_CHECK_OPERATION_TYPE(m_nvs_config.m_nvs_mode, e_nvs_operation_type::et_READ, m_TAG);
+
+            // We cannnot continue when previous operation (initialization in this case) has failed
+            M_CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
+            
+            // When we passed empty key, m_nvs_namespace_name will be used as key
+            const char * l_key = _set_key(key);
+
+            if constexpr (std::is_same_v<std::decay_t<T>, uint8_t>)
+            {
+                res = nvs_get_u8(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else if constexpr (std::is_same_v<std::decay_t<T>, uint16_t>)
+            {
+                res = nvs_get_u16(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else if constexpr (std::is_same_v<std::decay_t<T>, uint32_t>)
+            {
+               res = nvs_get_u32(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else if constexpr (std::is_same_v<std::decay_t<T>, uint64_t>)
+            {
+                res = nvs_get_u64(m_nvs_config.m_nvs_handle, l_key , value);
+            }       
+            else if constexpr (std::is_same_v<std::decay_t<T>, int8_t>)
+            {
+                res = nvs_get_i8(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else if constexpr (std::is_same_v<std::decay_t<T>, int16_t>)
+            {
+                res = nvs_get_i16(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else if constexpr (std::is_same_v<std::decay_t<T>, int32_t>)
+            {
+                res = nvs_get_i32(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else if constexpr (std::is_same_v<std::decay_t<T>, int64_t>)
+            {
+                res = nvs_get_i64(m_nvs_config.m_nvs_handle, l_key , value);
+            }
+            else
+            {
+              static_assert(std::disjunction<std::is_same<std::decay_t<T>, uint8_t>,
+                                             std::is_same<std::decay_t<T>, uint16_t>,
+                                             std::is_same<std::decay_t<T>, uint32_t>,
+                                             std::is_same<std::decay_t<T>, uint64_t>,
+                                             std::is_same<std::decay_t<T>, int8_t>,
+                                             std::is_same<std::decay_t<T>, int16_t>,
+                                             std::is_same<std::decay_t<T>, int32_t>,
+                                             std::is_same<std::decay_t<T>, int64_t>>::value,
+                                             "Invalid type for read_nvs_storage_numb");
+            }
+
+            Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "read_nvs_storage_numb");
+
+            return res;
         }
 
         /**
@@ -171,6 +255,11 @@ class NVSOperationHandle final
         esp_err_t write_to_nvs_storage_str(const char * key,
                                            T value)
         {
+            esp_err_t res = ESP_FAIL;
+
+            // Check if operatrion can be perfomre, based on mode
+            M_CHECK_OPERATION_TYPE(m_nvs_config.m_nvs_mode, e_nvs_operation_type::et_WRITE, m_TAG);
+            
             // We cannnot continue when previous operation (initialization in this case) has failed
             M_CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
             
@@ -180,12 +269,12 @@ class NVSOperationHandle final
             if constexpr (std::is_same_v<std::decay_t<T>, std::string> ||
                           std::is_same_v<std::decay_t<T>, std::string_view>)
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_str(m_nvs_config.m_nvs_handle, l_key , value.data());
+                res = nvs_set_str(m_nvs_config.m_nvs_handle, l_key , value.data());
             }
             else if constexpr (std::is_same_v<std::decay_t<T>, const char *> ||
                                std::is_same_v<std::decay_t<T>, char *>) 
             {
-                m_nvs_config.m_nvs_operation_res = nvs_set_str(m_nvs_config.m_nvs_handle, l_key , value);
+                res = nvs_set_str(m_nvs_config.m_nvs_handle, l_key , value);
             }
             else
             {
@@ -196,10 +285,19 @@ class NVSOperationHandle final
                                                "Invalid type for write_to_nvs_storage_str");
             }
 
-            Output::esp_result_handler(e_abort_handle::et_NOT_THROW, m_nvs_config.m_nvs_operation_res, m_TAG, "write_to_nvs_storage_str");
+            Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "write_to_nvs_storage_str");
 
             return m_nvs_config.m_nvs_operation_res;
         }
+
+        /**
+         * @brief Member funtion for reading (getting) 'string' from NVS storage
+         * @param key   Key value for storing
+         * @param value Value to be stored 
+         * @return result of storing
+         * **/
+        esp_err_t read_nvs_storage_str(const char * key,
+                                       std::string & value);
 
         /**
          * @brief Member funtion for writting (storing) 'blob' (bin data) to NVS storage
@@ -208,8 +306,9 @@ class NVSOperationHandle final
          * @return result of storing
          * **/
         template<typename T>
-        esp_err_t write_to_nvs_storage_blob(const char * key, T value)
+        esp_err_t write_to_nvs_storage_blob(const char * key, T * value)
         {
+            esp_err_t res = ESP_FAIL;
 
             // We cannnot continue when previous operation (initialization in this case) has failed
             M_CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
@@ -219,19 +318,19 @@ class NVSOperationHandle final
                 // When we passed empty key, m_nvs_namespace_name will be used as key
                 const char * l_key = _set_key(key);
 
-                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t *>)
+                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>)
                 {
-                    m_nvs_config.m_nvs_operation_res = nvs_set_blob(m_nvs_config.m_nvs_handle, l_key , value, sizeof(*value));
+                   res = nvs_set_blob(m_nvs_config.m_nvs_handle, l_key , value, sizeof(*value));
                 }
                 else
                 {
                     static_assert(std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>, "Invalid type for write_to_nvs_storage_blob");
                 }
 
-                Output::esp_result_handler(e_abort_handle::et_NOT_THROW, m_nvs_config.m_nvs_operation_res, m_TAG, "write_to_nvs_storage_blob");
+                Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "write_to_nvs_storage_blob");
             }
 
-            return m_nvs_config.m_nvs_operation_res;
+            return res;
         }
 
 
