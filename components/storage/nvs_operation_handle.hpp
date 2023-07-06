@@ -36,6 +36,12 @@ class NVSOperationHandle final
         s_nvs_config_t m_nvs_config;
 
     private:
+        /**
+         * @brief Private constructor (because of factory pattern) that 'opens' NVS handler (file)
+         * @param nvs_namespace_name Name of NVS namespace
+         * @param nvs_mode           Open mode 
+         * @return non
+         * **/
         NVSOperationHandle(const char * nvs_namespace_name,
                            nvs_open_mode_t nvs_mode)
         {
@@ -48,18 +54,26 @@ class NVSOperationHandle final
         }
     
     public:
+        /**
+         * @brief Static "creator" of this class (factory pattern)
+         * @param nvs_namespace_name Name of NVS namespace
+         * @param nvs_mode           Open mode 
+         * @return created object
+         * **/
         static NVSOperationHandle create(const char * nvs_namespace_name,
                                          nvs_open_mode_t nvs_mode)
         {
             return NVSOperationHandle(nvs_namespace_name, nvs_mode);
         }
-
+        /** @brief Deleted copy constructor and operator **/
         NVSOperationHandle(NVSOperationHandle const&) = delete;
         NVSOperationHandle& operator=(NVSOperationHandle const&) = delete;
 
+        /** @brief Default move constructor and operator declaration **/
         NVSOperationHandle(NVSOperationHandle &&) = default;
         NVSOperationHandle& operator=(NVSOperationHandle &&) = default;
        
+        /** @brief Custrom destructor commiting (in case of write) and closing NVS handler **/
         ~NVSOperationHandle()
         {
              // Check whenever is commit needed - write operation
@@ -75,14 +89,21 @@ class NVSOperationHandle final
         }
 
     public:
+        /**
+         * @brief Member funtion for writting (storing)'number' to NVS storage
+         * @param key   Key value for storing
+         * @param value Value to be stored 
+         * @return result of storing
+         * **/
         template<typename T>
-        esp_err_t write_to_nvs_storage_numb(const char * key, T value)
+        esp_err_t write_to_nvs_storage_numb(const char * key,
+                                            T value)
         {
             // We cannnot continue when previous operation (initialization in this case) has failed
             CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
             
             // When we passed empty key, m_nvs_namespace_name will be used as key
-            static constexpr const char * l_key = _set_key(key, m_nvs_config.m_nvs_namespace_name);
+            const char * l_key = _set_key(key);
 
             if constexpr (std::is_same_v<std::decay_t<T>, uint8_t>)
             {
@@ -134,15 +155,21 @@ class NVSOperationHandle final
             return m_nvs_config.m_nvs_operation_res;
         }
 
+        /**
+         * @brief Member funtion for writting (storing) 'string' to NVS storage
+         * @param key   Key value for storing
+         * @param value Value to be stored 
+         * @return result of storing
+         * **/
         template<typename T>
-        esp_err_t write_to_nvs_storage_str(const char * key, T value)
+        esp_err_t write_to_nvs_storage_str(const char * key,
+                                           T value)
         {
             // We cannnot continue when previous operation (initialization in this case) has failed
             CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
             
             // When we passed empty key, m_nvs_namespace_name will be used as key
-            // In this scenario l_key cannot be compute during compile-time, due to m_nvs_config.m_nvs_namespace_name
-            const char * l_key = _set_key(key, m_nvs_config.m_nvs_namespace_name);
+            const char * l_key = _set_key(key);
 
             if constexpr (std::is_same_v<std::decay_t<T>, std::string> ||
                           std::is_same_v<std::decay_t<T>, std::string_view>)
@@ -168,6 +195,12 @@ class NVSOperationHandle final
             return m_nvs_config.m_nvs_operation_res;
         }
 
+        /**
+         * @brief Member funtion for writting (storing) 'blob' (bin data) to NVS storage
+         * @param key   Key value for storing
+         * @param value Value to be stored 
+         * @return result of storing
+         * **/
         template<typename T>
         esp_err_t write_to_nvs_storage_blob(const char * key, T * value)
         {
@@ -178,8 +211,7 @@ class NVSOperationHandle final
             if (nullptr != value)
             {
                 // When we passed empty key, m_nvs_namespace_name will be used as key
-                // In this scenario l_key cannot be compute during compile-time, due to m_nvs_config.m_nvs_namespace_name
-                const char * l_key = _set_key(key, m_nvs_config.m_nvs_namespace_name);
+                const char * l_key = _set_key(key);
 
                 if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>)
                 {
@@ -199,13 +231,17 @@ class NVSOperationHandle final
 
     
     private:
-        inline static constexpr const char * _set_key(const char * key,
-                                                      const char * default_key)
+        /**
+         * @brief Check if key is set, otherwise sets namespaec name for a key
+         * @param key valu to check
+         * @return new key
+         * **/
+        inline const char * _set_key(const char * key)
         {
             const char * l_key = key;
             if ((nullptr == l_key) || (l_key[0] == '\0'))
             {
-                l_key = default_key;
+                l_key = m_nvs_config.m_nvs_namespace_name;
             }
 
             return l_key;
