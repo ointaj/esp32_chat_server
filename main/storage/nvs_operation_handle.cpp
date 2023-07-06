@@ -21,12 +21,11 @@ esp_err_t NVSOperationHandle::read_nvs_storage_str(const char * key,
     
     if (Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "read_nvs_storage_str - getting size"))
     {
-        
         value.resize(neeeded_size);
         res = nvs_get_str(m_nvs_config.m_nvs_handle, l_key , value.data(), &neeeded_size);
     }
 
     Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "read_nvs_storage_str - read");
 
-    return m_nvs_config.m_nvs_operation_res;
+    return res;
 }                                                   
