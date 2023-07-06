@@ -10,6 +10,8 @@
 /** see header **/
 SystemRun * SystemRun::m_system_instance = nullptr;
 
+static constexpr const char * per = ";l";
+
 /** see header **/
 void SystemRun::do_work()
 {

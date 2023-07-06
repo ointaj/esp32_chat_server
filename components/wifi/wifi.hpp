@@ -8,10 +8,10 @@
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
-#include "nvs_flash.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
+
 /** @brief App headers **/
 #include "output.hpp"
 
@@ -29,8 +29,13 @@ class WifiModule final
         /** @brief Tag represents this module **/
         static constexpr const char * m_TAG = "WiFi Module";
 
+        /** @brief Event group for signaling connection **/
         static EventGroupHandle_t m_wifi_event_handle;
 
+        /** @brief WiFi init configuration **/
+        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+
+        /** @brief WiFi configuration **/
         wifi_config_t wifi_config;
     
     public:
@@ -42,9 +47,7 @@ class WifiModule final
                                        m_TAG, " esp_netif_init");
             Output::esp_result_handler(e_AbortHandle::Throw, esp_event_loop_create_default(),
                                        m_TAG, " esp_event_loop_create_default");
-            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-            Output::esp_result_handler(e_AbortHandle::Throw, esp_wifi_init(),
+            Output::esp_result_handler(e_AbortHandle::Throw, esp_wifi_init(&cfg),
                                        m_TAG, " esp_netif_init");
-
         }
 };
