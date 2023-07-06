@@ -9,9 +9,9 @@
 
 
 /** @brief This macro allows all macro configuration for development mode **/
-#define DEV_MODE
+#define M_D_DEV_MODE
 
 /** @brief This macro allows to be ESP_LOG* prints messages on the terminal **/
-#ifdef DEV_MODE
-    #define TERMINAL_OUTPUT
+#ifdef M_D_DEV_MODE
+    #define M_D_TERMINAL_OUTPUT
 #endif // DEV_MODE

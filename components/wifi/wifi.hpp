@@ -43,11 +43,11 @@ class WifiModule final
         {
             m_wifi_event_handle =  xEventGroupCreate();
 
-            Output::esp_result_handler(e_AbortHandle::Throw, esp_netif_init(),
+            Output::esp_result_handler(e_abort_handle::et_THROW, esp_netif_init(),
                                        m_TAG, " esp_netif_init");
-            Output::esp_result_handler(e_AbortHandle::Throw, esp_event_loop_create_default(),
+            Output::esp_result_handler(e_abort_handle::et_THROW, esp_event_loop_create_default(),
                                        m_TAG, " esp_event_loop_create_default");
-            Output::esp_result_handler(e_AbortHandle::Throw, esp_wifi_init(&cfg),
+            Output::esp_result_handler(e_abort_handle::et_THROW, esp_wifi_init(&cfg),
                                        m_TAG, " esp_netif_init");
         }
 };

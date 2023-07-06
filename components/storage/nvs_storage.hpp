@@ -31,11 +31,11 @@ class NVS final
             {
                 // Erasing of NVS storage system - needed in case of those errors
                 res = nvs_flash_erase();
-                Output::esp_result_handler(e_AbortHandle::Throw, res, m_TAG, "nvs_flash_erase");
+                Output::esp_result_handler(e_abort_handle::et_THROW, res, m_TAG, "nvs_flash_erase");
                 // Re-initialization of NVS storage system - needed in case of those errors
                 res = nvs_flash_init();
-                Output::esp_result_handler(e_AbortHandle::Throw, res, m_TAG, "nvs_flash_init");
+                Output::esp_result_handler(e_abort_handle::et_THROW, res, m_TAG, "nvs_flash_init");
             }
-            Output::esp_result_handler(e_AbortHandle::Throw, res, m_TAG, "nvs_flash_init");
+            Output::esp_result_handler(e_abort_handle::et_THROW, res, m_TAG, "nvs_flash_init");
         }
 };

@@ -23,18 +23,18 @@
 
 
 /** @brief Enum represents logging level **/
-enum class e_LogType : uint8_t
+enum class e_log_type : uint8_t
 {
-    Info,
-    Warn,
-    Error
+    et_INFO,
+    et_WARN,
+    et_ERROR
 };
 
 /** @brief Enum represents types of aborts (excaptions) **/
-enum class e_AbortHandle : bool
+enum class e_abort_handle : bool
 {
-    Throw,
-    NotThrow
+    et_THROW,
+    et_NOT_THROW
 };
 
 /**
@@ -42,7 +42,7 @@ enum class e_AbortHandle : bool
 * @param args All arguments to be printed
 * @return converted argumetns to one string
 * **/
-#ifdef TERMINAL_OUTPUT
+#ifdef M_D_TERMINAL_OUTPUT
 template<typename T>
 static std::string args_to_string(T && args)
 {
@@ -57,7 +57,7 @@ static std::string args_to_string(T && args)
         return std::to_string(std::forward<T>(args));
     }
 }
-#endif // TERMINAL_OUTPUT
+#endif // M_D_TERMINAL_OUTPUT
 
 /** @brief Class that supports terminal output **/
 class Output final
@@ -74,26 +74,26 @@ class Output final
          * @return non
          * **/
         template <typename ... Args>
-        static inline void log(e_LogType log_type,
+        static inline void log(e_log_type log_type,
                                const char * tag,
                                Args &&... args)
         {
-#ifdef TERMINAL_OUTPUT
+#ifdef M_D_TERMINAL_OUTPUT
             const auto log_message = ((args_to_string(std::forward<Args>(args)) + ...));
             
             switch (log_type)
             {
-                case e_LogType::Info:
+                case e_log_type::et_INFO:
                 {
                     ESP_LOGI(tag, "%s", log_message.c_str());
                     break;
                 }
-                case e_LogType::Warn:
+                case e_log_type::et_WARN:
                 {
                     ESP_LOGW(tag, "%s", log_message.c_str());
                     break;
                 }
-                case e_LogType::Error:
+                case e_log_type::et_ERROR:
                 {
                     ESP_LOGE(tag, "%s", log_message.c_str());
                     break;
@@ -104,7 +104,7 @@ class Output final
                     break;
                 }
             }
-#endif // TERMINAL_OUTPUT
+#endif // M_D_TERMINAL_OUTPUT
         }
 
         /**
@@ -116,7 +116,7 @@ class Output final
          * @return non
          * **/
         template <typename ... Args>
-        static inline bool esp_result_handler(e_AbortHandle abort_handle,
+        static inline bool esp_result_handler(e_abort_handle abort_handle,
                                               const esp_err_t result,
                                               const char * tag,
                                               Args &&... args)
@@ -128,20 +128,20 @@ class Output final
                 case ESP_OK:
                 {
                     res = true;
-                    Output::log(e_LogType::Info, tag, std::forward<Args>(args)...,
+                    Output::log(e_log_type::et_INFO, tag, std::forward<Args>(args)...,
                                 m_result_literal, esp_err_to_name(result));
                     break;
                 }
                 default:
                 {
-                    Output::log(e_LogType::Error, tag, std::forward<Args>(args)...,
+                    Output::log(e_log_type::et_ERROR, tag, std::forward<Args>(args)...,
                                 m_result_literal, esp_err_to_name(result));
                    
                     break;
                 }
             }
 
-            if ((e_AbortHandle::Throw == abort_handle) && (!res))
+            if ((e_abort_handle::et_THROW == abort_handle) && (!res))
             {
                 abort();
             }
