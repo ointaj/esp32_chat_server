@@ -30,10 +30,11 @@ struct s_nvs_config_t
 {
     /** @brief NVS namespacen name **/
     const char * m_nvs_namespace_name;
+    /** @brief NVS open mode **/
+    nvs_open_mode_t m_nvs_mode;
     /** @brief Handle of nvs operation **/
     nvs_handle_t m_nvs_handle;
     /** @brief Result of nvs operation **/
     esp_err_t m_nvs_operation_res;
-    /** @brief NVS open mode **/
-    nvs_open_mode_t m_nvs_mode;
+  
 };

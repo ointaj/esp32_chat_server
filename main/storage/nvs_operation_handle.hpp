@@ -17,6 +17,12 @@
 #include "output.hpp"
 #include "nvs_data.hpp"
 
+/**
+ * 
+ * TODO - MAKE THIS THREAD SAVE
+ * 
+ * ***/
+
 
 /** @brief Macro defintion of checking nvs last operation, before executing new one **/
 #define M_CHECK_NVS_OPERATION(RESULT_VAR) \
@@ -60,9 +66,8 @@ class NVSOperationHandle final
         NVSOperationHandle(const char * nvs_namespace_name,
                            nvs_open_mode_t nvs_mode)
         {
-            m_nvs_config.m_nvs_mode = nvs_mode;
             m_nvs_config.m_nvs_namespace_name = nvs_namespace_name;
-
+            m_nvs_config.m_nvs_mode = nvs_mode;
             m_nvs_config.m_nvs_operation_res = nvs_open(m_nvs_config.m_nvs_namespace_name, nvs_mode,
                                                        &m_nvs_config.m_nvs_handle);
             Output::esp_result_handler(e_abort_handle::et_NOT_THROW, m_nvs_config.m_nvs_operation_res, m_TAG, "nvs_open");
@@ -80,6 +85,7 @@ class NVSOperationHandle final
         {
             return NVSOperationHandle(nvs_namespace_name, nvs_mode);
         }
+
         /** @brief Deleted copy constructor and operator **/
         NVSOperationHandle(NVSOperationHandle const&) = delete;
         NVSOperationHandle& operator=(NVSOperationHandle const&) = delete;
@@ -88,7 +94,7 @@ class NVSOperationHandle final
         NVSOperationHandle(NVSOperationHandle &&) = default;
         NVSOperationHandle& operator=(NVSOperationHandle &&) = default;
        
-        /** @brief Custrom destructor commiting (in case of write) and closing NVS handler **/
+        /** @brief Custrom destructor for commiting (in case of write) and closing NVS handler **/
         ~NVSOperationHandle()
         {
              // Check whenever is commit needed - write operation
@@ -176,9 +182,9 @@ class NVSOperationHandle final
         
         /**
          * @brief Member funtion for reading (getting) 'number' from NVS storage
-         * @param key   Key value for storing
-         * @param value Value to be stored 
-         * @return result of storing
+         * @param key   Key value for getting
+         * @param value Read value 
+         * @return result of getting
          * **/
         template<typename T>
         esp_err_t read_nvs_storage_numb(const char * key,
@@ -292,9 +298,9 @@ class NVSOperationHandle final
 
         /**
          * @brief Member funtion for reading (getting) 'string' from NVS storage
-         * @param key   Key value for storing
-         * @param value Value to be stored 
-         * @return result of storing
+         * @param key   Key value for getting
+         * @param value Read value
+         * @return result of getting
          * **/
         esp_err_t read_nvs_storage_str(const char * key,
                                        std::string & value);
@@ -309,6 +315,9 @@ class NVSOperationHandle final
         esp_err_t write_to_nvs_storage_blob(const char * key, T * value)
         {
             esp_err_t res = ESP_FAIL;
+
+            // Check if operatrion can be perfomre, based on mode
+            M_CHECK_OPERATION_TYPE(m_nvs_config.m_nvs_mode, e_nvs_operation_type::et_WRITE, m_TAG);
 
             // We cannnot continue when previous operation (initialization in this case) has failed
             M_CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
@@ -333,8 +342,43 @@ class NVSOperationHandle final
             return res;
         }
 
+         /**
+         * @brief Member funtion for reading (gettin) 'blob' (bin data) to NVS storage
+         * @param key   Key value for getting
+         * @param value Read value 
+         * @return result of getting
+         * **/
+        template<typename T>
+        esp_err_t read_from_nvs_storage_blob(const char * key, T * value)
+        {
+            esp_err_t res = ESP_FAIL;
 
-    
+            // Check if operatrion can be perfomre, based on mode
+            M_CHECK_OPERATION_TYPE(m_nvs_config.m_nvs_mode, e_nvs_operation_type::et_READ, m_TAG);
+
+            // We cannnot continue when previous operation (initialization in this case) has failed
+            M_CHECK_NVS_OPERATION(m_nvs_config.m_nvs_operation_res);
+            
+            if (nullptr != value)
+            {
+                // When we passed empty key, m_nvs_namespace_name will be used as key
+                const char * l_key = _set_key(key);
+
+                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>)
+                {
+                   res = nvs_get_blob(m_nvs_config.m_nvs_handle, l_key , value, sizeof(*value));
+                }
+                else
+                {
+                    static_assert(std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>, "Invalid type for write_to_nvs_storage_blob");
+                }
+
+                Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "write_to_nvs_storage_blob");
+            }
+
+            return res;
+        }
+
     private:
         /**
          * @brief Check if key is set, otherwise sets namespaec name for a key

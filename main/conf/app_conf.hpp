@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file   app_configuration.cpp
+ * @file   app_conf.hpp
  * @author Oliver Sintaj
  * @date   2023
  * @brief  All needed configuratuion for application

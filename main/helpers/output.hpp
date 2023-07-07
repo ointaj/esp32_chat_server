@@ -19,7 +19,7 @@
 #include <cstdlib>
 
 /** @brief App headers **/
-#include "app_configuration.hpp"
+#include "app_conf.hpp"
 
 
 /** @brief Enum represents logging level **/

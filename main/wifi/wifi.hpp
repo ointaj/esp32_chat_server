@@ -41,6 +41,7 @@ class WifiModule final
     public:
         WifiModule()
         {
+            // TODO - add ap an sta mode at once
             m_wifi_event_handle =  xEventGroupCreate();
 
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_netif_init(),
