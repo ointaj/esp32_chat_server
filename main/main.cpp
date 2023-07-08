@@ -14,5 +14,5 @@ extern "C"
 /** @see app_main(void) **/
 void app_main(void)
 {
-    SystemRun::get_instance()->do_work();
+    SystemRun::get_instance().do_work();
 }

@@ -18,13 +18,6 @@
 #include "nvs_data.hpp"
 #include "storage_locker.hpp"
 
-/**
- * 
- * TODO - MAKE THIS THREAD SAVE
- * 
- * ***/
-
-
 /** @brief Macro defintion of checking nvs last operation, before executing new one **/
 #define M_CHECK_NVS_OPERATION(RESULT_VAR) \
     if (ESP_OK != (RESULT_VAR)) { \
@@ -41,7 +34,7 @@
     } while(0)
 
 /** @brief Enum represent operatation types**/
-enum class e_nvs_operation_type
+enum class e_nvs_operation_type : bool
 {
     et_READ,
     et_WRITE

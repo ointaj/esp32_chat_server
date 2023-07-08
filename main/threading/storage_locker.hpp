@@ -29,6 +29,7 @@ class StorageLocker final
         /** @brief Mutex handle - holts mutex **/
         SemaphoreHandle_t m_mutex;
 
+        /** @brief Flag that tells if init locker during construction (in constructor) **/
         static constexpr bool m_locker_lock_in_init = true;
 
     private:
