@@ -16,6 +16,7 @@
 /** @brief App headers **/
 #include "output.hpp"
 #include "nvs_data.hpp"
+#include "storage_locker.hpp"
 
 /**
  * 
@@ -56,6 +57,9 @@ class NVSOperationHandle final
         /** @brief Instance of nvs config data **/
         s_nvs_config_t m_nvs_config;
 
+        /** @brief Instance of nvs locker mechanism **/
+        Locker<StorageLocker> m_storage_locker;
+
     private:
         /**
          * @brief Private constructor (because of factory pattern) that 'opens' NVS handler (file)
@@ -65,6 +69,7 @@ class NVSOperationHandle final
          * **/
         NVSOperationHandle(const char * nvs_namespace_name,
                            nvs_open_mode_t nvs_mode)
+                        : m_storage_locker(StorageLocker::get_instance(et_NVS).get_lock())
         {
             m_nvs_config.m_nvs_namespace_name = nvs_namespace_name;
             m_nvs_config.m_nvs_mode = nvs_mode;

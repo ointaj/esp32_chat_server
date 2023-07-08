@@ -5,6 +5,7 @@
 /** @brief App headers **/
 #include "system_run.hpp"
 #include "output.hpp"
+#include "storage_locker.hpp"
 
 
 /** see header **/

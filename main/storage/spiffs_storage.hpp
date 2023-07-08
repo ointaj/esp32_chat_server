@@ -27,6 +27,7 @@ class SPIFFS final
         /** @brief Main configurattion of SPIFFS file system **/
         esp_vfs_spiffs_conf_t m_spiffs_conf;
 
+
     public:
 
         /**
