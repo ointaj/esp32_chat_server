@@ -36,5 +36,4 @@ struct s_nvs_config_t
     nvs_handle_t m_nvs_handle;
     /** @brief Result of nvs operation **/
     esp_err_t m_nvs_operation_res;
-  
 };
