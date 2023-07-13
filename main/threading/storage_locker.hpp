@@ -69,7 +69,7 @@ class StorageLocker final
          * **/
         inline Locker<StorageLocker> get_lock()
         {
-            return Locker<StorageLocker>(*this, INFINITE_WAIT, m_locker_lock_in_init);
+            return Locker<StorageLocker>(this, INFINITE_WAIT, m_locker_lock_in_init);
         }
 
         /** @brief Deleted copy constructor/operator **/

@@ -28,14 +28,13 @@ class Locker final
 {
     private:
         /** @brief Reference to a locker (mutex) **/
-        const T & m_locker;
+        T * m_locker;
 
         /** @brief Miliseconds how much time should xSemaphoreTake wait if mutex its not available **/
-        const TickType_t m_lock_time;
+        TickType_t m_lock_time;
         
         /** @brief Flag is true when a semaphore is locked **/
         bool m_is_locked;
-
 
     public:
         /**
@@ -44,18 +43,20 @@ class Locker final
          * @param ms     Miliseconds how much time should xSemaphoreTake wait if mutex its not available
          * @param lock   If flag is true, locking is perfomed in constructor
          * **/
-        Locker(const T & locker,
+        Locker(T * locker,
                const TickType_t ms,
                const bool lock)
             : m_locker(locker),
               m_lock_time(ms),
               m_is_locked(lock)
         {
+
+            assert((locker != nullptr));
             // Check if we should lock in constructor
             if (lock)
             {
                 // Setting flag, trui if xSemaphoreTake successed (mutex was locked)
-                m_is_locked = xSemaphoreTake(m_locker.m_mutex, m_lock_time);
+                m_is_locked = xSemaphoreTake(m_locker->m_mutex, m_lock_time);
             }
         }
 
@@ -69,7 +70,7 @@ class Locker final
             assert(!m_is_locked);
             
             // Perfoming locking
-            m_is_locked = xSemaphoreTake(m_locker.m_mutex, m_lock_time);
+            m_is_locked = xSemaphoreTake(m_locker->m_mutex, m_lock_time);
 
             return m_is_locked;
         }
@@ -88,7 +89,7 @@ class Locker final
             // Releasing semaphore is only possible when locking was sucessful
             if (m_is_locked)
             {
-                xSemaphoreGive(m_locker.m_mutex);
+                xSemaphoreGive(m_locker->m_mutex);
             }
         }
 
@@ -96,8 +97,25 @@ class Locker final
         Locker(Locker const&) = delete;
         Locker& operator=(Locker const&) = delete;
 
-        /** @brief Deleted move constructor/operator **/
-        Locker(Locker &&) = delete;
-        Locker& operator=(Locker &&) = delete;
+        /** @brief Move constructor, which will set other Locker to default state**/
+        Locker(Locker && other) : m_locker(other.m_locker),
+                                  m_lock_time(other.m_lock_time),
+                                  m_is_locked(other.m_is_locked)
+        {
+            other.m_locker = nullptr;
+        }
 
+        /** @brief Move assigment operator, which will set other Locker to default state**/
+        Locker& operator=(Locker && other)
+        {
+            if (this != &other)
+            {
+                m_locker = other.m_locker;
+                m_lock_time = other.m_lock_time;
+                m_is_locked = other.m_is_locked;
+                other.m_locker = nullptr;
+            }
+
+            return *this;
+        }
 };

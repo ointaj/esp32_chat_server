@@ -17,6 +17,6 @@
 
 /** @brief This macro allows to run SPIFFS formating new parttion if constiscky check failed 
  * 
- *  @note  If you allow this configurain, you are aware of lossing old data on partition
+ *  @note  If you allow this configurain, you are aware of lossing old data on partition due to re-formmating
  * **/
 #define M_D_FORMAT_NEW_PARTION_AFTER_CONSTANCY_FAILED

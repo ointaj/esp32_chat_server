@@ -17,6 +17,8 @@
 #include <type_traits>
 #include <string>
 #include <cstdlib>
+#include <errno.h>
+#include <string.h>
 
 /** @brief App headers **/
 #include "app_conf.hpp"
@@ -147,5 +149,21 @@ class Output final
             }
             
             return res;
+        }
+
+        /**
+         * @brief Member function that prints value of errno 
+         * @param tag     Tag name
+         * @param success If false, operation has failed and print errno value
+         * @return non
+         * **/
+        static inline void esp_errno_output(const char * tag,
+                                            bool success = true)
+        {
+            if (!success)
+            {
+                const auto errno_copy = errno;
+                Output::log(e_log_type::et_ERROR, tag, strerror(errno_copy));
+            }
         }
 };

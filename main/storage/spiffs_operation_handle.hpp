@@ -16,7 +16,10 @@
 
 /** @brief App headers**/
 #include "output.hpp"
+#include "storage_locker.hpp"
 
+/** @brief Class represents working with spiffs file sysstem
+ *  @note  Thread-safe **/
 class SPIFFSOperationHandle final
 {
     public:
@@ -31,11 +34,20 @@ class SPIFFSOperationHandle final
         /** @brief Tag represents this module **/
         static constexpr const char * m_TAG = "SPIFFS Operation Handle";
 
-        static constexpr std::string_view default_path = "/spiffs/";
+        /** @brief Default path standars prefix 
+         * 
+         * @note All paths should be pass to this class like this -> /spiffs/file.txt
+         * **/
+        static constexpr std::string_view m_default_path = "/spiffs/";
 
+        /** @brief Locker for SPIFFS filesystem **/
+        Locker<StorageLocker> m_locker;
 
         /** @brief File handler **/
         FILE * m_file_handler;
+
+        /** @brief Path to file **/
+        std::string m_file_name;
 
         /** @brief Current mode of working with file **/
         const char * m_current_mode;
@@ -44,25 +56,28 @@ class SPIFFSOperationHandle final
         std::size_t m_file_size;
 
     private:
-        SPIFFSOperationHandle(std::string_view path_to_file,
+        /**
+         * @brief Constructor initilizing all neeede members and perform open
+         * @param path_to_file Path to file
+         * @param mode Mode in which file is opened
+         * **/
+        SPIFFSOperationHandle(std::string && path_to_file,
                               const char * mode)
-                : m_current_mode(mode), m_file_size(0)
+                : m_locker(StorageLocker::get_instance(et_SPIFFS).get_lock()),
+                  m_file_name(std::move(path_to_file)),
+                  m_current_mode(mode), m_file_size(0)
         {
-            const auto starts = _starts_with_default_path(path_to_file);
-            const auto path = [starts, path_to_file]() -> std::string
+            // Check if path is correct
+            if (!_starts_with_default_path(m_file_name))
             {
-                if (!starts)
-                {
-                    return std::string(default_path) + std::string(path_to_file);
-                }
-                return std::string(path_to_file);
-            }();
+                m_file_name = std::string(m_default_path) + m_file_name;
+            }
             // Open file
-            m_file_handler = fopen(path.c_str(), mode);
+            m_file_handler = fopen(m_file_name.c_str(), mode);
             // Check if opening file was success
             if (is_file_open())
             {
-              _get_file_info(path.c_str());
+              _get_file_info(m_file_name.c_str());
             }
         }
     
@@ -92,7 +107,7 @@ class SPIFFSOperationHandle final
 
         inline bool _starts_with_default_path(std::string_view path)
         {
-            return path.substr(0, default_path.size()) == default_path;
+            return path.substr(0, m_default_path.size()) == m_default_path;
         }
         
 
@@ -103,21 +118,50 @@ class SPIFFSOperationHandle final
          * @param nvs_mode           Open mode 
          * @return created object
          * **/
-        static SPIFFSOperationHandle create(std::string_view path_to_file,
+        static SPIFFSOperationHandle create(std::string && path_to_file,
                                             const char * mode)
         {
-            return SPIFFSOperationHandle(path_to_file, mode);
+            return SPIFFSOperationHandle(std::move(path_to_file), mode);
         }
         
         /** @brief Deleted copy constructor and operator **/
         SPIFFSOperationHandle(SPIFFSOperationHandle const&) = delete;
         SPIFFSOperationHandle& operator=(SPIFFSOperationHandle const&) = delete;
 
-        /** @brief Default move constructor and operator declaration **/
-        // this will be changed
-        SPIFFSOperationHandle(SPIFFSOperationHandle &&) = default;
-        SPIFFSOperationHandle& operator=(SPIFFSOperationHandle &&) = default;
+        /** @brief Custom move constructor and setting other SPIFFSOperationHandle as default **/
+        SPIFFSOperationHandle(SPIFFSOperationHandle && other)
+                : m_locker(std::move(other.m_locker)),
+                  m_file_handler(other.m_file_handler),
+                  m_file_name(std::move(m_file_name)),
+                  m_current_mode(other.m_current_mode),
+                  m_file_size(other.m_file_size)
+        {
+            // Setting other to default
+            other.m_file_handler = nullptr;
+            other.m_current_mode = nullptr;
+            other.m_file_size = 0;
+        }
 
+        /** @brief Custom move assigment operator and setting other SPIFFSOperationHandle as default **/
+        SPIFFSOperationHandle& operator=(SPIFFSOperationHandle && other)
+        {
+            if (this != &other)
+            {
+                m_locker = std::move(other.m_locker);
+                m_file_handler = other.m_file_handler;
+                m_file_name = std::move(other.m_file_name);
+                m_current_mode = other.m_current_mode;
+                m_file_size = other.m_file_size;
+                // Setting other to default
+                other.m_file_handler = nullptr;
+                other.m_current_mode = nullptr;
+                other.m_file_size = 0;
+            }
+
+            return *this;
+        }
+
+        /** @brief Destructor which calls close on file **/
         ~SPIFFSOperationHandle()
         {
             if (nullptr != m_file_handler)
@@ -127,23 +171,57 @@ class SPIFFSOperationHandle final
         }
 
     public:
+        /**
+         * @brief Reads data from the file
+         * @return returns filled string with data in file
+         * **/
         std::string read();
 
+        /**
+         * @brief Writes data to the file
+         * @param data Data to be written 
+         * @return true if write was successful
+         * **/
         bool write(std::string_view data);
 
+        /**
+         * @brief Appends data to the file
+         * @param data Data to be written 
+         * @return true if write was successful
+         * **/
         bool append(std::string_view data);
+ 
+        /**
+         * @brief Performe seek in file
+         * @param position position (offset) 
+         * @return true if write was successful
+         * **/
+        bool seek(int64_t position,
+                  int32_t whence);
+        
+        /**
+         * @brief Remove file
+         * @return true if removing was succesful
+         * **/
+        bool remove();
 
-        bool seek();
+        /**
+         * @brief Change name of file
+         * @param new_filename name of file
+         * @return true if renaming was succesful
+         * **/
+        bool change_file_name(std::string && new_filename);
 
-        bool change_file_name(std::string_view filename);
-
+        /**
+         * @brief Check if file is open
+         * @return true when file is open
+         * **/
         inline bool is_file_open()
         {
-            bool res = true;
+            bool res = false;
             if (nullptr != m_file_handler)
             {
-                res = false;
-                Output::log(e_log_type::et_ERROR, m_TAG, "File openning has failed !");
+                res = true;
             }
             return res;
         }
