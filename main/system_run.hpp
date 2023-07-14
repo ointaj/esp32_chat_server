@@ -12,6 +12,7 @@
 #include "spiffs_storage.hpp"
 #include "nvs_operation_handle.hpp"
 #include "spiffs_operation_handle.hpp"
+#include "thread.hpp"
 
 
 /** @brief Class represents main logic of application **/
