@@ -158,12 +158,14 @@ class Output final
          * @return non
          * **/
         static inline void esp_errno_output(const char * tag,
-                                            bool success = true)
+                                            bool success = false)
         {
+#ifdef M_D_TERMINAL_OUTPUT
             if (!success)
             {
                 const auto errno_copy = errno;
                 Output::log(e_log_type::et_ERROR, tag, strerror(errno_copy));
             }
+#endif // M_D_TERMINAL_OUTPUT
         }
 };
