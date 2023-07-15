@@ -13,6 +13,9 @@ file(GLOB_RECURSE EXTRA_SOURCES3 "wifi/*.cpp")
 # Get a list of all .cpp files from thread
 file(GLOB_RECURSE EXTRA_SOURCES4 "threading/*.cpp")
 
+# Get a list of all .cpp files from thread
+file(GLOB_RECURSE EXTRA_SOURCES5 "comm/*.cpp")
+
 idf_component_register(
     SRCS 
                 "system_run.cpp"
@@ -21,6 +24,7 @@ idf_component_register(
                 ${EXTRA_SOURCES2}
                 ${EXTRA_SOURCES3}
                 ${EXTRA_SOURCES4}
+                ${EXTRA_SOURCES5}
     INCLUDE_DIRS "."
                  "conf"
                  "helpers"
@@ -30,4 +34,8 @@ idf_component_register(
                  "threading"
                  "threading/data_definition"
                  "threading/locking"
+                 "comm"
+                 "peripherals"
+                 "peripherals/uart"
+                 "peripherals/uart/data_definition"
 )
