@@ -32,6 +32,7 @@ void Thread::_spawn_thread()
         default:
         {
             assert(false);
+            break;
         }   
     }
 }

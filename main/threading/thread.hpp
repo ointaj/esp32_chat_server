@@ -25,31 +25,45 @@ enum class e_thread_creater : uint8_t
     et_AFFINITY,
 };
 
+/**
+ * @todo ADDED CUSTOM MOVE CONST AND DISABLE COPY CONST (ALSO OPERATORS)
+ * **/
+
 /** @brief Class represent working with threds in freeRTOS **/
 class Thread final
 {
     private:
-        /** @brief **/
+        /** @brief Instance of thread config **/
         s_thread_config_t m_thread_config;
-        /** @brief **/
+        /** @brief Handler fot thread **/
         TaskHandle_t m_thread_handler;
-        /** @brief **/
+        /** @brief Type of creation thread **/
         e_thread_creater m_thread_creator_type;
-        /** @brief **/
+        /** @brief True if thread was spawned **/
         bool thread_spawned;
 
     public:
-        /** @brief **/
+        /** 
+         * @brief Constructor for initializinng thread specification 
+         * @param thread_function Function which will be runned in thread
+         * @param thread_name Name of thread
+         * @param thread_stack_size Size of thread stack
+         * @param thread_priority Priority on which thread will be runned
+         * @param thread_creator_type Type of creation for thread (specific core or basic)
+         * @param spawn_thread True if thread should be spawned in constructor
+         * @param core_number Number on which core should thread run in case of et_AFFINITY
+         * **/
         Thread(std::function<void()> && thread_function,
                const char * thread_name,
-               const uint32_t thread_size,
+               const uint32_t thread_stack_size,
                const UBaseType_t thread_priority,
                e_thread_creater thread_creator_type = e_thread_creater::et_NO_AFFINITY,
                bool spawn_thread = true,
                uint8_t core_number = 0)
             : m_thread_config{std::move(thread_function), thread_name,
-                              thread_size, thread_priority, core_number},
-              m_thread_creator_type(thread_creator_type), thread_spawned(spawn_thread)
+                              thread_stack_size, thread_priority, core_number},
+              m_thread_creator_type(thread_creator_type),
+              thread_spawned(spawn_thread)
         {
             if (spawn_thread)
             {
@@ -58,19 +72,29 @@ class Thread final
         }
 
     public:
-        /** @brief **/
+        /** 
+         * @brief Member function explicitly spawn and run thread
+         * @return non 
+         * **/
         inline void start()
         {
-            // Thread cannot be spawned twice, cause abort
+            // Thread cannot be spawned twice, cause abort()
             assert((!thread_spawned));
             _spawn_thread();
         }
 
     private:
-        /** @brief **/
+        /**
+         * @brief Member function which spawns (create) thread
+         * @return non 
+         * **/
         void _spawn_thread();
        
-        /** @brief **/
+        /** 
+         * @brief Member function called in thread and perfoming operationrs
+         * @param ptr pointer to passed object in creator
+         * @return non
+         * **/
         static void _run(void * ptr)
         {
             // If nullptr cause abort()
