@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file   wifi.hpp
+ * @author Oliver Sintaj
+ * @date   2023
+ * @brief  Wifi module
+ */
+
 /** @brief ESP-IDF headers **/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -13,7 +20,7 @@
 #include "lwip/sys.h"
 
 /** @brief App headers **/
-#include "helpers/output.hpp"
+#include "output.hpp"
 
 /**
  * @file   wifi.hpp
@@ -22,7 +29,7 @@
  * @brief  Full WiFi configuration and communication
  */
 
-/** @brief Class represend all functionialty needed for WiFi **/
+/** @brief Class represents all functionialty needed for WiFi **/
 class WifiModule final
 {
     private:
@@ -41,13 +48,16 @@ class WifiModule final
     public:
         WifiModule()
         {
-            // TODO - add ap an sta mode at once
             m_wifi_event_handle =  xEventGroupCreate();
-
+            // Init TCP/IP stack
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_netif_init(),
                                        m_TAG, " esp_netif_init");
+            
+            /** @todo maybe move esp_event to /main/events ? **/
+            // Creates default event loop 
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_event_loop_create_default(),
                                        m_TAG, " esp_event_loop_create_default");
+            esp_netif_create_default_wifi_sta();
             esp_netif_create_default_wifi_ap();
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_wifi_init(&cfg),
                                        m_TAG, " esp_netif_init");

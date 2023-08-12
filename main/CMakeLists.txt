@@ -19,6 +19,9 @@ file(GLOB_RECURSE EXTRA_SOURCES5 "comm/*.cpp")
 # Get a list of all .cpp files from commands
 file(GLOB_RECURSE EXTRA_SOURCES6 "cmd/*.cpp")
 
+# Get a list of all .cpp files from commands
+file(GLOB_RECURSE EXTRA_SOURCES7 "events/*.cpp")
+
 idf_component_register(
     SRCS 
                 "system_run.cpp"
@@ -29,6 +32,7 @@ idf_component_register(
                 ${EXTRA_SOURCES4}
                 ${EXTRA_SOURCES5}
                 ${EXTRA_SOURCES6}
+                ${EXTRA_SOURCES7}
     INCLUDE_DIRS "."
                  "conf"
                  "helpers"
@@ -43,4 +47,6 @@ idf_component_register(
                  "peripherals"
                  "peripherals/uart"
                  "peripherals/uart/data_definition"
+                 "events"
+                 "events/data_definition"
 )
