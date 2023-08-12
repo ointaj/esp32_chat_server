@@ -17,7 +17,7 @@
 
 
 /** @brief Struct represents WiFi credentials for connection **/
-struct s_wifi_credentiols_t
+struct s_wifi_credentials_t
 {
     /** @brief SSID for AP **/
     std::array<char, 50> m_ssid;

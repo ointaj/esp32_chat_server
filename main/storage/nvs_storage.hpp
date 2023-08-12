@@ -15,6 +15,7 @@
 #include "output.hpp"
 
 
+
 /** @brief Class represent initialization of NVS storage **/
 class NVS final
 {

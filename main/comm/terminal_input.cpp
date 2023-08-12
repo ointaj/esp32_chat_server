@@ -1,7 +1,7 @@
 #include "terminal_input.hpp"
 
 /** see header **/
-std::string Terminal::read_line_blocking(const TickType_t tick_to_wait)
+std::string InputTerminal::read_line_blocking(const TickType_t tick_to_wait)
 {
     std::string data;
 

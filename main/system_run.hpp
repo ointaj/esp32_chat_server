@@ -32,7 +32,7 @@ class SystemRun final
         /** @brief SystemRun constructor **/
         SystemRun() : m_spiffs(nullptr, nullptr, 5, true, true)
         {
-        }
+        }   
 
         /** @brief SystemRun copy-constructor deleted **/
         SystemRun(SystemRun const&) = delete;
@@ -61,4 +61,7 @@ class SystemRun final
         /** @brief Main function that runs app 
          *  @return non**/
         void do_work(void);
+    
+    private:
+        void _init_all();
 };

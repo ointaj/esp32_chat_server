@@ -70,7 +70,7 @@ class NVSOperationHandle final
                                                        &m_nvs_config.m_nvs_handle);
             Output::esp_result_handler(e_abort_handle::et_NOT_THROW, m_nvs_config.m_nvs_operation_res, m_TAG, "nvs_open");
         }
-    
+
     public:
         /**
          * @brief Static "creator" of this class (factory pattern)
@@ -314,7 +314,7 @@ class NVSOperationHandle final
         {
             esp_err_t res = ESP_FAIL;
 
-            // Check if operatrion can be perfomre, based on mode
+            // Che  ck if operatrion can be perfomre, based on mode
             M_CHECK_OPERATION_TYPE(m_nvs_config.m_nvs_mode, e_nvs_operation_type::et_WRITE, m_TAG);
 
             // We cannnot continue when previous operation (initialization in this case) has failed
@@ -325,13 +325,13 @@ class NVSOperationHandle final
                 // When we passed empty key, m_nvs_namespace_name will be used as key
                 const char * l_key = _set_key(key);
 
-                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>)
+                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentials_t>)
                 {
                    res = nvs_set_blob(m_nvs_config.m_nvs_handle, l_key , value, sizeof(*value));
                 }
                 else
                 {
-                    static_assert(std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>, "Invalid type for write_to_nvs_storage_blob");
+                    static_assert(std::is_same_v<std::decay_t<T>, s_wifi_credentials_t>, "Invalid type for write_to_nvs_storage_blob");
                 }
 
                 Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "write_to_nvs_storage_blob");
@@ -362,13 +362,13 @@ class NVSOperationHandle final
                 // When we passed empty key, m_nvs_namespace_name will be used as key
                 const char * l_key = _set_key(key);
 
-                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>)
+                if constexpr (std::is_same_v<std::decay_t<T>, s_wifi_credentials_t>)
                 {
                    res = nvs_get_blob(m_nvs_config.m_nvs_handle, l_key , value, sizeof(*value));
                 }
                 else
                 {
-                    static_assert(std::is_same_v<std::decay_t<T>, s_wifi_credentiols_t>, "Invalid type for write_to_nvs_storage_blob");
+                    static_assert(std::is_same_v<std::decay_t<T>, s_wifi_credentials_t>, "Invalid type for write_to_nvs_storage_blob");
                 }
 
                 Output::esp_result_handler(e_abort_handle::et_NOT_THROW, res, m_TAG, "write_to_nvs_storage_blob");

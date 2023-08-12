@@ -15,7 +15,7 @@
  * @brief  Default initialization of uart config for terminal readings
  * @return defaul uart config
  * **/
-static constexpr uart_config_t __uart_default_config()
+static inline constexpr uart_config_t __uart_default_config()
 {
    return {
         .baud_rate = TERMINAL_BAUD_RATE,
@@ -32,7 +32,7 @@ static constexpr uart_config_t __uart_default_config()
  * @brief  Default initialization of uart driver config for terminal readings
  * @return defaul uart driver config
  * **/
-static constexpr s_uart_driver_conf_t __uart_driver_default_config()
+static inline constexpr s_uart_driver_conf_t __uart_driver_default_config()
 {
    return {
         .m_rx_buffer_size = TERMINAL_RX_BUFF_SIZE,
@@ -44,33 +44,53 @@ static constexpr s_uart_driver_conf_t __uart_driver_default_config()
     };
 }
 
-/** @brief **/
-class Terminal final : public UART
+/** @brief Terminal input **/
+class InputTerminal final : public UART
 {   
-    public:
-        Terminal(const uart_config_t & uart_config,
-                 const s_uart_driver_conf_t & uart_driver_conf)
+    private:
+        /** 
+         * @brief Constructor for Input Terminal (singleton pattern)
+         * @param uart_config      uart configuration
+         * @param uart_driver_conf uart driver configuratuon
+         * **/
+        InputTerminal(const uart_config_t & uart_config,
+                      const s_uart_driver_conf_t & uart_driver_conf)
             : UART(uart_config, uart_driver_conf)
         {}
 
     public:
-        static inline Terminal create_default()
+        /** 
+         * @brief Getter for InputTerminal instance
+         * @return Reference to InputTerminal
+         * **/
+        static inline InputTerminal & get_instance()
         {
             static constexpr auto uart_conf = __uart_default_config();
             static constexpr auto uart_driver_conf = __uart_driver_default_config();
-            return Terminal(uart_conf, uart_driver_conf);
+
+            static InputTerminal instance(uart_conf, uart_driver_conf);
+
+            return instance;
         }
 
+        /** 
+         * @brief Reading line from terminal (until new line is pressed)
+         * @return readen data
+         * **/
         inline std::string read_line_blocking()
         {
             return read_line_blocking(INFINITE_WAIT);
         }
-
+        /** 
+         * @brief Reading line from terminal (until new line is pressed)
+         * @param tick_to_wait How many ticks wait untill data arrives to UART
+         * @return readen data
+         * **/
         std::string read_line_blocking(const TickType_t tick_to_wait);
     public:
-        Terminal(const Terminal&) = delete;
-        Terminal& operator=(const Terminal&) = delete;
+        InputTerminal(const InputTerminal&) = delete;
+        InputTerminal& operator=(const InputTerminal&) = delete;
         
-        Terminal(Terminal &&) = delete;
-        Terminal& operator=(Terminal&&) = delete;
+        InputTerminal(InputTerminal &&) = delete;
+        InputTerminal& operator=(InputTerminal&&) = delete;
 };
