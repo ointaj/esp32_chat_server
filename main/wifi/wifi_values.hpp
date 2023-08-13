@@ -15,3 +15,11 @@ inline constexpr uint32_t WIFI_STA_DISCONNECTED = (1 << 1);
 
 /** @brief Maximal count of re-try connetion of wifi **/
 inline constexpr uint8_t WIFI_MAX_COUNT_OF_CONNETCTION_ATTEMPS = 10;
+
+/** @brief  **/
+inline constexpr const char * WIFI_AP_SSID = "";
+
+/** @brief  **/
+inline constexpr const char * WIFI_AP_PASS = "";
+
+inline constexpr int32_t WIFI_AP_MAX_CONNECTION = 20;

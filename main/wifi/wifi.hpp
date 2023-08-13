@@ -41,15 +41,15 @@ class WifiModule final
         s_wifi_event_data_t m_wifi_event_data;
 
         /** @brief WiFi init configuration **/
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+        wifi_init_config_t m_cfg = WIFI_INIT_CONFIG_DEFAULT();
 
-        /** @brief WiFi configuration **/
-        wifi_config_t wifi_config;
+        /** @brief WiFi configuration for STA and AP**/
+        wifi_config_t m_wifi_config;
 
     public:
         WifiModule()
         {
-            m_wifi_event_handle = xEventGroupCreate();
+            m_wifi_event_data.m_wifi_event_handle = xEventGroupCreate();
             // Init TCP/IP stack
             Output::esp_result_handler(e_abort_handle::et_THROW, esp_netif_init(),
                                        m_TAG, " esp_netif_init");
@@ -64,7 +64,7 @@ class WifiModule final
             // Register event handler for wifi event
             default_event.register_handler(_get_wifi_event_handler_conf());
 
-            Output::esp_result_handler(e_abort_handle::et_THROW, esp_wifi_init(&cfg),
+            Output::esp_result_handler(e_abort_handle::et_THROW, esp_wifi_init(&m_cfg),
                                        m_TAG, " esp_netif_init");
         }
     
@@ -74,7 +74,7 @@ class WifiModule final
          * @param
          * @return 
          * **/
-        bool start_wifi(s_wifi_credentials_t const& wifi_credentials);
+        void start_wifi(s_wifi_credentials_t const& wifi_credentials);
 
         /**
          * @brief 
