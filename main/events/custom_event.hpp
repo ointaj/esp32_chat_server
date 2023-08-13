@@ -76,6 +76,7 @@ class CustomEvent final
          * **/
         CustomEvent& operator=(CustomEvent const&) = delete;
         CustomEvent& operator=(CustomEvent &&) = delete;
+    
     public:
         /**
          * @brief Registering handler for occurennce of event

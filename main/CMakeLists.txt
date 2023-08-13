@@ -39,6 +39,7 @@ idf_component_register(
                  "storage"
                  "storage/data_definition"
                  "wifi"
+                 "wifi/data_definition"
                  "threading"
                  "threading/data_definition"
                  "threading/locking"
